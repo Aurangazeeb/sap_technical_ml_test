@@ -1,0 +1,17 @@
+[project]
+name = "sap-cxii-tech-ex-01"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "auru", email = "aurangazeebak@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+sap-cxii-tech-ex-01 = "sap_cxii_tech_ex_01:main"
+
+[build-system]
+requires = ["uv_build>=0.9.11,<0.10.0"]
+build-backend = "uv_build"

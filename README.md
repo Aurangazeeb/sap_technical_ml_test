@@ -10,7 +10,7 @@ You are tasked with implementing a product similarity search feature using the g
 - Utilize dimensionality reduction techniques (e.g., PCA, t-SNE) before similarity computation
 - Consider caching strategies for frequently accessed products
 
-### Multimodal Similarity Search (Optional)
+### Multimodal Similarity Search
 - Extend the similarity search to incorporate both text and image features, creating a multimodal product recommendation system.
 #### Text-Based Similarity:
 - Extract meaningful features from product descriptions, names, and other text attributes-
