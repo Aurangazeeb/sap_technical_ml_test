@@ -7,7 +7,11 @@ authors = [
     { name = "auru", email = "aurangazeebak@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "ipykernel>=7.2.0",
+    "jupyterlab>=4.5.7",
+    "pandas>=3.0.3",
+]
 
 [project.scripts]
 sap-cxii-tech-ex-01 = "sap_cxii_tech_ex_01:main"
