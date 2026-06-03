@@ -22,6 +22,20 @@ def test_weight_sentinel_replaced_with_nan(
     assert result["weight"].isna().all()
 
 
+# ── Zero-price handling ───────────────────────────────────────────────────────
+
+def test_zero_sales_price_treated_as_missing(
+    valid_record: dict, settings
+) -> None:
+    """Zero prices are coerced to NaN and then imputed with median."""
+    record = {**valid_record, "uniq_id": "prod_zero", "sales_price": 0.0}
+    df = pd.DataFrame([valid_record, record])
+    p = Preprocessor(settings)
+    result = p.fit_transform(df)
+    # The zero-price row should have been imputed, not left as 0
+    assert (result["sales_price"] != 0).all()
+
+
 # ── Column-level drop ─────────────────────────────────────────────────────────
 
 def test_columns_above_drop_threshold_are_removed(
@@ -31,6 +45,20 @@ def test_columns_above_drop_threshold_are_removed(
     p = Preprocessor(settings)
     result = p.fit_transform(df_with_all_null_column)
     assert "fully_missing_col" not in result.columns
+
+
+@pytest.mark.parametrize(
+    "col",
+    ["weight", "discount_percentage", "colour", "no__of_reviews"],
+    ids=["weight_100pct", "discount_100pct", "colour_80pct", "reviews_88pct"],
+)
+def test_known_sparse_columns_are_dropped(
+    sample_df: pd.DataFrame, settings, col: str
+) -> None:
+    """Columns identified in exploration as >60% missing must be dropped."""
+    p = Preprocessor(settings)
+    result = p.fit_transform(sample_df)
+    assert col not in result.columns
 
 
 # ── Row-level drop ────────────────────────────────────────────────────────────
@@ -87,6 +115,20 @@ def test_categorical_encoding_produces_integers(
     p = Preprocessor(settings)
     result = p.fit_transform(sample_df)
     assert result["brand"].dtype in ("int32", "int64")
+
+
+@pytest.mark.parametrize(
+    "col",
+    ["delivery_type", "amazon_prime__y_or_n", "best_seller_tag__y_or_n"],
+)
+def test_binary_categoricals_survive_and_are_encoded(
+    sample_df: pd.DataFrame, settings, col: str
+) -> None:
+    """Low-cardinality binary columns must be present and integer-encoded."""
+    p = Preprocessor(settings)
+    result = p.fit_transform(sample_df)
+    assert col in result.columns
+    assert result[col].dtype in ("int32", "int64")
 
 
 # ── StandardScaler behaviour ─────────────────────────────────────────────────
