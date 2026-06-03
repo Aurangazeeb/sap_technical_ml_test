@@ -46,7 +46,7 @@ def valid_record() -> dict:
         "uniq_id": "prod_001",
         "product_name": "Blue Denim Jacket",
         "brand": "Levis",
-        "colour": "Blue",
+        "colour": None,           # ~80% NaN in real dataset — dropped by col threshold
         "sales_price": 1299.0,
         "rating": 4.2,
         "weight": None,            # weight is always None after sentinel cleanup

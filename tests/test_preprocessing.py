@@ -16,10 +16,12 @@ from sap_cxii_tech_ex_01.preprocessing import Preprocessor  # noqa: F401 — RED
 def test_weight_sentinel_replaced_with_nan(
     sentinel_weight_record: dict, settings
 ) -> None:
+    """Sentinel 999_999_999 → NaN, making weight 100% missing → column dropped."""
     df = pd.DataFrame([sentinel_weight_record])
     p = Preprocessor(settings)
     result = p.fit_transform(df)
-    assert result["weight"].isna().all()
+    # weight is 100% NaN after sentinel cleanup, so it is dropped by col threshold
+    assert "weight" not in result.columns
 
 
 # ── Zero-price handling ───────────────────────────────────────────────────────
@@ -28,12 +30,20 @@ def test_zero_sales_price_treated_as_missing(
     valid_record: dict, settings
 ) -> None:
     """Zero prices are coerced to NaN and then imputed with median."""
-    record = {**valid_record, "uniq_id": "prod_zero", "sales_price": 0.0}
-    df = pd.DataFrame([valid_record, record])
+    records = [
+        {**valid_record, "uniq_id": "p1", "sales_price": 800.0},
+        {**valid_record, "uniq_id": "p2", "sales_price": 1200.0},
+        {**valid_record, "uniq_id": "p3", "sales_price": 0.0},  # zero → NaN → imputed to median=1000
+    ]
+    df = pd.DataFrame(records)
     p = Preprocessor(settings)
     result = p.fit_transform(df)
-    # The zero-price row should have been imputed, not left as 0
-    assert (result["sales_price"] != 0).all()
+    # No NaN after imputation
+    assert result["sales_price"].isna().sum() == 0
+    # p3 was imputed to the median (1000), which scales to 0.0 in StandardScaler space.
+    # p1 (800) and p2 (1200) are equidistant from the median so they scale symmetrically.
+    assert result["sales_price"].iloc[2] == pytest.approx(0.0, abs=0.01)
+    assert result["sales_price"].iloc[0] == pytest.approx(-result["sales_price"].iloc[1], abs=0.01)
 
 
 # ── Column-level drop ─────────────────────────────────────────────────────────
