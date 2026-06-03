@@ -11,8 +11,14 @@ dependencies = [
     "ipykernel>=7.2.0",
     "jupyterlab>=4.5.7",
     "pandas>=3.0.3",
+    "pydantic-settings>=2.0",
+    "pytest>=9.0.3",
     "rich>=15.0.0",
+    "scikit-learn>=1.5",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [project.scripts]
 sap-cxii-tech-ex-01 = "sap_cxii_tech_ex_01:main"
