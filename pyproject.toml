@@ -13,6 +13,7 @@ dependencies = [
     "pytest>=9.0.3",
     "rich>=15.0.0",
     "scikit-learn>=1.5",
+    "sentence-transformers>=3.0",
 ]
 
 [tool.pytest.ini_options]
