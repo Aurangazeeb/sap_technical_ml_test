@@ -50,17 +50,24 @@ class ImageExtractor:
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
-        self._model: nn.Module = _load_model(settings.image_model)
+        self._model: nn.Module | None = None  # lazy-loaded on first real fetch
         self._cache: dict[str, np.ndarray] = {}
+
+    def _get_model(self) -> nn.Module:
+        """Return the model, loading it on first call."""
+        if self._model is None:
+            self._model = _load_model(self._settings.image_model)
+        return self._model
 
     def _fetch_embedding(self, url: str) -> np.ndarray:
         """Download *url*, run through the model, return a (dim,) float32 array."""
+        model = self._get_model()
         with urllib.request.urlopen(url, timeout=_FETCH_TIMEOUT_SECS) as resp:
             raw = resp.read()
         image = Image.open(io.BytesIO(raw)).convert("RGB")
         tensor = _PREPROCESS(image).unsqueeze(0)  # (1, 3, 224, 224)
         with torch.no_grad():
-            embedding: torch.Tensor = self._model(tensor)
+            embedding: torch.Tensor = model(tensor)
         return embedding.squeeze(0).numpy().astype(np.float32)
 
     def extract(self, image_urls: list[str | None]) -> np.ndarray:
