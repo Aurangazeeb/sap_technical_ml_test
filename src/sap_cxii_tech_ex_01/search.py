@@ -14,10 +14,10 @@ from sap_cxii_tech_ex_01.features.structured import StructuredExtractor
 from sap_cxii_tech_ex_01.features.text import TextExtractor
 from sap_cxii_tech_ex_01.similarity import SimilarityEngine
 
-__all__ = ["find_similar_products"]
+__all__ = ["find_similar_products", "load_dataset"]
 
 
-def _load_dataset(settings: Settings) -> pd.DataFrame:
+def load_dataset(settings: Settings) -> pd.DataFrame:
     """Load the product dataset from the path configured in *settings*."""
     return pd.read_json(settings.data_path, lines=True)
 
@@ -47,7 +47,7 @@ def find_similar_products(product_id: str, num_similar: int) -> list[str]:
         If *product_id* is not present in the dataset.
     """
     settings = get_settings()
-    df = _load_dataset(settings)
+    df = load_dataset(settings)
 
     ids: list[str] = df["uniq_id"].tolist()
     if product_id not in ids:

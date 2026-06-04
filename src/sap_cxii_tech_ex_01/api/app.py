@@ -15,7 +15,7 @@ import pandas as pd
 from fastapi import FastAPI
 
 from sap_cxii_tech_ex_01.config import Settings, get_settings
-from sap_cxii_tech_ex_01.search import _load_dataset
+from sap_cxii_tech_ex_01.search import load_dataset
 
 __all__ = ["app"]
 
@@ -24,7 +24,7 @@ __all__ = ["app"]
 async def lifespan(app: FastAPI):
     """Preload dataset and settings once at startup; store in app.state."""
     settings: Settings = get_settings()
-    df: pd.DataFrame = _load_dataset(settings)
+    df: pd.DataFrame = load_dataset(settings)
     app.state.settings = settings
     app.state.df = df
     app.state.startup_time = time.monotonic()
