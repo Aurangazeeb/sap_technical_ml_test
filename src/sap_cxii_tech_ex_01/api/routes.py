@@ -1,9 +1,11 @@
 """Route handlers for the similarity search microservice."""
 from __future__ import annotations
 
+import time
+
 from fastapi import APIRouter, HTTPException, Request
 
-from sap_cxii_tech_ex_01.api.models import SimilarProductsResponse
+from sap_cxii_tech_ex_01.api.models import HealthResponse, ReadyResponse, SimilarProductsResponse
 from sap_cxii_tech_ex_01.search import find_similar_products
 
 __all__ = ["router"]
@@ -47,3 +49,20 @@ def get_find_similar_products(
         similar_products=similar,
         count=len(similar),
     )
+
+
+@router.get("/health", response_model=HealthResponse, summary="Liveness probe")
+def health(request: Request) -> HealthResponse:
+    """Always returns 200 once the server is up."""
+    uptime = time.monotonic() - request.app.state.startup_time
+    return HealthResponse(
+        status="ok",
+        dataset_size=len(request.app.state.df),
+        uptime_seconds=round(uptime, 3),
+    )
+
+
+@router.get("/ready", response_model=ReadyResponse, summary="Readiness probe")
+def ready(request: Request) -> ReadyResponse:
+    """Returns 200 with ready=True once data and models are loaded."""
+    return ReadyResponse(ready=bool(request.app.state.ready))

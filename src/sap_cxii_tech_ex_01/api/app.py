@@ -12,7 +12,8 @@ import time
 from contextlib import asynccontextmanager
 
 import pandas as pd
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from sap_cxii_tech_ex_01.config import Settings, get_settings
 from sap_cxii_tech_ex_01.search import load_dataset  # noqa: F401 — imported for patch target in tests
@@ -44,6 +45,15 @@ app = FastAPI(
 from sap_cxii_tech_ex_01.api import routes  # noqa: E402 — import after app creation
 
 app.include_router(routes.router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(_request: Request, _exc: Exception) -> JSONResponse:
+    """Return a structured 500 with no stack trace in production."""
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred. Please try again later."},
+    )
 
 
 if __name__ == "__main__":
