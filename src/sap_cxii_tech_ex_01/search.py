@@ -8,7 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from sap_cxii_tech_ex_01.config import Settings
+from sap_cxii_tech_ex_01.config import Settings, get_settings
 from sap_cxii_tech_ex_01.features.image import ImageExtractor
 from sap_cxii_tech_ex_01.features.structured import StructuredExtractor
 from sap_cxii_tech_ex_01.features.text import TextExtractor
@@ -17,23 +17,22 @@ from sap_cxii_tech_ex_01.similarity import SimilarityEngine
 __all__ = ["find_similar_products"]
 
 
-def find_similar_products(
-    product_id: str,
-    df: pd.DataFrame,
-    settings: Settings,
-    num_similar: int = 10,
-) -> list[str]:
+def _load_dataset(settings: Settings) -> pd.DataFrame:
+    """Load the product dataset from the path configured in *settings*."""
+    return pd.read_json(settings.data_path, lines=True)
+
+
+def find_similar_products(product_id: str, num_similar: int) -> list[str]:
     """Return the *num_similar* most similar product IDs to *product_id*.
+
+    Data and configuration are loaded automatically from ``Settings`` / ``.env``.
+    In tests, patch ``sap_cxii_tech_ex_01.search._load_dataset`` and/or
+    ``sap_cxii_tech_ex_01.search.get_settings`` to inject controlled fixtures.
 
     Parameters
     ----------
     product_id:
         The ``uniq_id`` of the query product.
-    df:
-        DataFrame containing product records (already loaded; need not be
-        preprocessed — feature extractors handle missing values internally).
-    settings:
-        Application settings controlling model names and similarity weights.
     num_similar:
         Number of similar products to return (query product excluded).
 
@@ -45,8 +44,11 @@ def find_similar_products(
     Raises
     ------
     ValueError
-        If *product_id* is not present in ``df['uniq_id']``.
+        If *product_id* is not present in the dataset.
     """
+    settings = get_settings()
+    df = _load_dataset(settings)
+
     ids: list[str] = df["uniq_id"].tolist()
     if product_id not in ids:
         raise ValueError(
@@ -57,23 +59,19 @@ def find_similar_products(
     # ── Text features ─────────────────────────────────────────────────────────
     text_col = "product_name" if "product_name" in df.columns else "uniq_id"
     texts: list[str | None] = df[text_col].tolist()
-    text_extractor = TextExtractor(settings)
-    text_feats = text_extractor.extract(texts)
+    text_feats = TextExtractor(settings).extract(texts)
 
     # ── Image features — skip model load when no URLs are present ─────────────
     image_col = "image_urls__small"
     has_images = image_col in df.columns and df[image_col].notna().any()
-    if has_images:
-        image_extractor = ImageExtractor(settings)
-        image_feats: np.ndarray | None = image_extractor.extract(
-            df[image_col].tolist()
-        )
-    else:
-        image_feats = None
+    image_feats: np.ndarray | None = (
+        ImageExtractor(settings).extract(df[image_col].tolist())
+        if has_images
+        else None
+    )
 
     # ── Structured features ───────────────────────────────────────────────────
-    struct_extractor = StructuredExtractor(settings)
-    struct_feats = struct_extractor.fit_transform(df)
+    struct_feats = StructuredExtractor(settings).fit_transform(df)
 
     # ── Combine & rank ────────────────────────────────────────────────────────
     engine = SimilarityEngine(settings)
