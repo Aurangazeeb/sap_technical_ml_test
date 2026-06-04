@@ -6,7 +6,7 @@ import time
 from fastapi import APIRouter, HTTPException, Request
 
 from sap_cxii_tech_ex_01.api.models import HealthResponse, ReadyResponse, SimilarProductsResponse
-from sap_cxii_tech_ex_01.search import find_similar_products
+from sap_cxii_tech_ex_01.search import SearchState, find_similar_products
 
 __all__ = ["router"]
 
@@ -39,8 +39,10 @@ def get_find_similar_products(
             ),
         )
 
+    search_state: SearchState = request.app.state.search_state
+
     try:
-        similar = find_similar_products(product_id, num_similar)
+        similar = find_similar_products(product_id, num_similar, search_state)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 

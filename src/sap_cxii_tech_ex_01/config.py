@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     image_cache_dir: Path = Path(".cache/images")
     image_cache_size: int = 10_000
 
+    # --- Feature extraction ---
+    skip_images: bool = True  # skip image download/extraction for fast startup
+
     # --- API ---
     api_host: str = "0.0.0.0"
     api_port: int = 8000

@@ -5,8 +5,9 @@ in Steps 3-5.  Tests define the contract — status codes, response schema,
 and error behaviour — without relying on the real dataset or ML models.
 
 Injection strategy (DR_0008):
-- Patch ``sap_cxii_tech_ex_01.api.app.get_settings`` / ``_load_dataset`` so
-  the lifespan runs with test fixtures stored in ``app.state``.
+- Patch ``sap_cxii_tech_ex_01.api.app.get_settings`` / ``load_dataset`` /
+  ``build_search_state`` so the lifespan runs with test fixtures stored in
+  ``app.state``.
 - Patch ``sap_cxii_tech_ex_01.api.routes.find_similar_products`` to control
   what each scenario returns / raises.
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
 from starlette.testclient import TestClient
@@ -22,6 +24,7 @@ import sap_cxii_tech_ex_01.api.app as _app_mod
 import sap_cxii_tech_ex_01.api.routes as _routes_mod
 from sap_cxii_tech_ex_01.api.app import app
 from sap_cxii_tech_ex_01.config import Settings
+from sap_cxii_tech_ex_01.search import SearchState
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -49,33 +52,45 @@ def tiny_df() -> pd.DataFrame:
 
 
 @pytest.fixture
-def api_client(test_settings: Settings, tiny_df: pd.DataFrame):
-    """TestClient whose lifespan is controlled by patches.
-
-    Yields a ``TestClient`` with an extra attribute ``_mock_find_similar``
-    so individual tests can customise ``return_value`` or ``side_effect``.
-    """
-    with patch.object(_app_mod, "get_settings", return_value=test_settings):
-        with patch.object(_app_mod, "load_dataset", return_value=tiny_df):
-            with patch.object(
-                _routes_mod, "find_similar_products", return_value=_MOCK_SIMILAR
-            ) as mock_fn:
-                with TestClient(app) as client:
-                    client._mock_find_similar = mock_fn
-                    yield client
+def dummy_search_state() -> SearchState:
+    n, dim = 5, 8
+    rng = np.random.default_rng(42)
+    vecs = rng.standard_normal((n, dim)).astype(np.float32)
+    norms = np.linalg.norm(vecs, axis=1, keepdims=True)
+    normalized = vecs / np.where(norms == 0.0, 1.0, norms)
+    return SearchState(
+        ids=[f"prod_{i:03d}" for i in range(n)],
+        normalized=normalized,
+        prices=None,
+    )
 
 
 @pytest.fixture
-def api_client_no_raise(test_settings: Settings, tiny_df: pd.DataFrame):
+def api_client(test_settings: Settings, tiny_df: pd.DataFrame, dummy_search_state: SearchState):
+    """TestClient whose lifespan is controlled by patches."""
+    with patch.object(_app_mod, "get_settings", return_value=test_settings):
+        with patch.object(_app_mod, "load_dataset", return_value=tiny_df):
+            with patch.object(_app_mod, "build_search_state", return_value=dummy_search_state):
+                with patch.object(
+                    _routes_mod, "find_similar_products", return_value=_MOCK_SIMILAR
+                ) as mock_fn:
+                    with TestClient(app) as client:
+                        client._mock_find_similar = mock_fn
+                        yield client
+
+
+@pytest.fixture
+def api_client_no_raise(test_settings: Settings, tiny_df: pd.DataFrame, dummy_search_state: SearchState):
     """Like ``api_client`` but surfaces 500 responses instead of re-raising."""
     with patch.object(_app_mod, "get_settings", return_value=test_settings):
         with patch.object(_app_mod, "load_dataset", return_value=tiny_df):
-            with patch.object(
-                _routes_mod, "find_similar_products", return_value=_MOCK_SIMILAR
-            ) as mock_fn:
-                with TestClient(app, raise_server_exceptions=False) as client:
-                    client._mock_find_similar = mock_fn
-                    yield client
+            with patch.object(_app_mod, "build_search_state", return_value=dummy_search_state):
+                with patch.object(
+                    _routes_mod, "find_similar_products", return_value=_MOCK_SIMILAR
+                ) as mock_fn:
+                    with TestClient(app, raise_server_exceptions=False) as client:
+                        client._mock_find_similar = mock_fn
+                        yield client
 
 
 # ── Happy-path tests ──────────────────────────────────────────────────────────

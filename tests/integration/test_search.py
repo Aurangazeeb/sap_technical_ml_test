@@ -1,19 +1,16 @@
 """Search integration tests.
 
 Validates end-to-end pipeline behaviour via ``find_similar_products``.
-Patches data-loading so the real dataset is not required during CI.
+Constructs ``SearchState`` via ``build_search_state`` with small test DataFrames
+so no real dataset or .env is required during CI.
 """
 from __future__ import annotations
-
-from contextlib import contextmanager
-from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
-import sap_cxii_tech_ex_01.search as _search_mod
-from sap_cxii_tech_ex_01.search import find_similar_products
+from sap_cxii_tech_ex_01.search import SearchState, build_search_state, find_similar_products
 
 
 # ── Helpers & fixtures ────────────────────────────────────────────────────────
@@ -41,36 +38,23 @@ def tiny_df() -> pd.DataFrame:
 
 
 @pytest.fixture
-def patched(settings, tiny_df):
-    with (
-        patch.object(_search_mod, "get_settings", return_value=settings),
-        patch.object(_search_mod, "load_dataset", return_value=tiny_df),
-    ):
-        yield
-
-
-@contextmanager
-def _patch_with_df(settings, df):
-    with (
-        patch.object(_search_mod, "get_settings", return_value=settings),
-        patch.object(_search_mod, "load_dataset", return_value=df),
-    ):
-        yield
+def state(settings, tiny_df) -> SearchState:
+    return build_search_state(tiny_df, settings)
 
 
 # ── Integration: all returned IDs exist in the input DataFrame ───────────────
 
-def test_results_are_valid_product_ids(patched, tiny_df):
+def test_results_are_valid_product_ids(state, tiny_df):
     valid_ids = set(tiny_df["uniq_id"].tolist())
-    for pid in find_similar_products("prod_001", 4):
+    for pid in find_similar_products("prod_001", 4, state):
         assert pid in valid_ids, f"{pid!r} not in input DataFrame"
 
 
 # ── Integration: num_similar == len(df) - 1 (max possible) ───────────────────
 
-def test_num_similar_max_returns_all_others(patched, tiny_df):
+def test_num_similar_max_returns_all_others(state, tiny_df):
     n = len(tiny_df)
-    results = find_similar_products("prod_000", n - 1)
+    results = find_similar_products("prod_000", n - 1, state)
     assert len(results) == n - 1
     assert "prod_000" not in results
     assert set(results) == set(tiny_df["uniq_id"].tolist()) - {"prod_000"}
@@ -99,8 +83,8 @@ def test_text_identical_products_rank_highest(settings):
             "image_urls__small": [None] * 5,
         }
     )
-    with _patch_with_df(settings, df):
-        results = find_similar_products("prod_000", 1)
+    state = build_search_state(df, settings)
+    results = find_similar_products("prod_000", 1, state)
     assert results[0] == "prod_001", (
         f"Expected 'prod_001' (identical text) to rank first, got {results[0]!r}"
     )

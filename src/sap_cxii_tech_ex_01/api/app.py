@@ -8,6 +8,7 @@ GET /ready                   Readiness probe
 """
 from __future__ import annotations
 
+import logging
 import time
 from contextlib import asynccontextmanager
 
@@ -16,19 +17,27 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from sap_cxii_tech_ex_01.config import Settings, get_settings
-from sap_cxii_tech_ex_01.search import load_dataset  # noqa: F401 — imported for patch target in tests
+from sap_cxii_tech_ex_01.search import build_search_state, load_dataset  # noqa: F401 — imported for patch target in tests
 
 __all__ = ["app"]
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Preload dataset and settings once at startup; store in app.state."""
+    """Preload dataset, extract features, and build search state at startup."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:  %(name)s - %(message)s")
     settings: Settings = get_settings()
+    logger.info("Loading dataset from %s…", settings.data_path)
     df: pd.DataFrame = load_dataset(settings)
+    logger.info("Dataset loaded: %d rows.", len(df))
     app.state.settings = settings
     app.state.df = df
     app.state.startup_time = time.monotonic()
+
+    # Heavy feature extraction happens once here, not per-request.
+    app.state.search_state = build_search_state(df, settings)
     app.state.ready = True
     yield
     app.state.ready = False
