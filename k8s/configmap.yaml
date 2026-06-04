@@ -1,0 +1,18 @@
+# ConfigMap — tunable similarity weights and cache parameters.
+# All values are injected as environment variables with the SAP_ prefix,
+# matching the pydantic-settings schema in src/sap_cxii_tech_ex_01/config.py.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: similarity-config
+  labels:
+    app: product-similarity
+data:
+  SAP_WEIGHT_TEXT: "0.4"
+  SAP_WEIGHT_IMAGE: "0.3"
+  SAP_WEIGHT_STRUCTURED: "0.3"
+  SAP_FALLBACK_WEIGHT_TEXT: "0.6"
+  SAP_FALLBACK_WEIGHT_STRUCTURED: "0.4"
+  SAP_IMAGE_CACHE_SIZE: "10000"
+  SAP_API_HOST: "0.0.0.0"
+  SAP_API_PORT: "8000"

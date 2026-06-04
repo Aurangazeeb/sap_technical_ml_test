@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-similarity
+  labels:
+    app: product-similarity
+spec:
+  # Single replica is appropriate for this evaluation workload.
+  # Horizontal scaling: increase replicas or add an HPA on CPU/latency metrics.
+  # Note: the in-process image cache is per-replica; a shared Redis cache would
+  # be needed for cache efficiency at N>1 replicas.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-similarity
+  template:
+    metadata:
+      labels:
+        app: product-similarity
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+
+      containers:
+        - name: api
+          image: product-similarity:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+
+          # Inject all tunable parameters from ConfigMap
+          envFrom:
+            - configMapRef:
+                name: similarity-config
+
+          # Liveness probe — always returns 200 once the process is running.
+          # initialDelaySeconds accounts for model/data loading (~30 s).
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+
+          # Readiness probe — only passes once app.state.ready == True.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: false  # sentence-transformers writes model cache
+
+      restartPolicy: Always
