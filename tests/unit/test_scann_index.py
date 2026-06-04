@@ -23,9 +23,18 @@ import pytest
 
 @pytest.fixture
 def random_vectors() -> np.ndarray:
-    """(200, 64) float32 matrix — same shape as HNSW contract tests."""
+    """(1000, 64) float32 matrix with low-rank cluster structure.
+
+    Partition-based ANN (ScaNN) achieves meaningful recall only when vectors
+    have cluster structure — random isotropic Gaussian is adversarial for
+    k-means partitioning because all points are equidistant in cosine space.
+    """
     rng = np.random.default_rng(42)
-    return rng.standard_normal((200, 64)).astype(np.float32)
+    latent = rng.standard_normal((1000, 16)).astype(np.float32)
+    proj = rng.standard_normal((16, 64)).astype(np.float32)
+    vecs = latent @ proj
+    vecs += 0.05 * rng.standard_normal(vecs.shape).astype(np.float32)
+    return vecs
 
 
 @pytest.fixture
@@ -43,7 +52,8 @@ def pca_reduced_vectors() -> np.ndarray:
 def scann_index():
     """Import and construct a ScaNNIndex (will fail until Step 10)."""
     from sap_cxii_tech_ex_01.backends.scann_index import ScaNNIndex
-    return ScaNNIndex()
+    # Search 50% of leaves for high recall in tests
+    return ScaNNIndex(num_leaves_to_search_ratio=0.5, num_reorder=100)
 
 
 @pytest.fixture
@@ -102,10 +112,13 @@ def test_scann_query_distances_non_negative(built_scann_index, random_vectors) -
 # ── Recall@k ─────────────────────────────────────────────────────────────────
 
 def _brute_force_top_k(vectors: np.ndarray, query_idx: int, k: int) -> set[int]:
-    diffs = vectors - vectors[query_idx]
-    dists = np.linalg.norm(diffs, axis=1)
-    dists[query_idx] = np.inf
-    return set(np.argsort(dists)[:k].tolist())
+    """Brute-force cosine top-k (matching ScaNN's dot-product metric)."""
+    norms = np.linalg.norm(vectors, axis=1, keepdims=False)
+    norms = np.where(norms == 0.0, 1.0, norms)
+    normed = vectors / norms[:, None]
+    scores = normed @ normed[query_idx]
+    scores[query_idx] = -np.inf
+    return set(np.argsort(scores)[::-1][:k].tolist())
 
 
 def test_scann_recall_at_k_above_threshold(built_scann_index, random_vectors) -> None:

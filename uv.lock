@@ -1613,6 +1613,21 @@ wheels = [
 ]
 
 [[package]]
+name = "protobuf"
+version = "7.35.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/fd/5b1491d9e4b586d621c54f4c36b888714164b6875f8d6afa3f9072906a51/protobuf-7.35.0.tar.gz", hash = "sha256:a2efd84605f41e559f1881b0912b44099d0a2ac9bf46b3474823f10fb393b0e6", size = 458677, upload-time = "2026-05-19T23:02:29.197Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/83/ee/93d06e358a4aa32280b00e722d3ea0a1f25fc3cc5778d80581c9cca2c10e/protobuf-7.35.0-cp310-abi3-macosx_10_9_universal2.whl", hash = "sha256:66be6c513931c794fa92c080ffee41671390da3d79da219cf9c0c0907f035dda", size = 433225, upload-time = "2026-05-19T23:02:19.884Z" },
+    { url = "https://files.pythonhosted.org/packages/8b/39/1c76c2da93f3c507e958e0aecee2391cc44d4625de6c728bbc555195b5a8/protobuf-7.35.0-cp310-abi3-manylinux2014_aarch64.whl", hash = "sha256:fcbe42a4ac09d3ec9c987ddfcd956afd0b15f1ff613bd8371bde9405ffd5c8e5", size = 328847, upload-time = "2026-05-19T23:02:22.3Z" },
+    { url = "https://files.pythonhosted.org/packages/91/1a/39f7ce90a238c1a987a4d81ec26379e02ca0aff367de68e4a1fa474215b9/protobuf-7.35.0-cp310-abi3-manylinux2014_s390x.whl", hash = "sha256:4cbf5cc286130e06a6c9bbefac442431173906dfcc979712183d4adcc01b37ee", size = 344030, upload-time = "2026-05-19T23:02:23.591Z" },
+    { url = "https://files.pythonhosted.org/packages/70/5b/6baf9008817964454055ff3fe65f1de0b5f1e26c80c82f7fb108b7cd4ea3/protobuf-7.35.0-cp310-abi3-manylinux2014_x86_64.whl", hash = "sha256:6c0f98f10c8a05ea30f8993dfef2de093d27b490fdae78bb60c8343795d55011", size = 327130, upload-time = "2026-05-19T23:02:24.637Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/e5/e46adb0badc388bfb84877a5f9f026aff63f60e611016cf64dbe77e05446/protobuf-7.35.0-cp310-abi3-win32.whl", hash = "sha256:4c4617b83ade0e279d1d2bfe04025a1adb87f9ed657de038620dc0ff959357f6", size = 428946, upload-time = "2026-05-19T23:02:25.741Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/ab/547fbd9e16d879dd13c167478f8ae0a83a428008ca07a5e06acdc23ad473/protobuf-7.35.0-cp310-abi3-win_amd64.whl", hash = "sha256:f05bcadf9a2a6b8dda047007075135fb7d08c73d9177aabc067e1be46881a201", size = 439996, upload-time = "2026-05-19T23:02:26.808Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/ef/50433d346c56657a70d27f156c7b349ac59a068b01de4eb796e747eecc43/protobuf-7.35.0-py3-none-any.whl", hash = "sha256:c13f325cf242bad135c350629eeb5d54b24228eb472fb3e2e9ebbd4c5dc20ca0", size = 171659, upload-time = "2026-05-19T23:02:27.842Z" },
+]
+
+[[package]]
 name = "psutil"
 version = "7.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2242,6 +2257,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "pytest" },
     { name = "rich" },
+    { name = "scann" },
     { name = "scikit-learn" },
     { name = "sentence-transformers" },
     { name = "torchvision" },
@@ -2259,10 +2275,26 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "rich", specifier = ">=15.0.0" },
+    { name = "scann", specifier = ">=1.4.2" },
     { name = "scikit-learn", specifier = ">=1.5" },
     { name = "sentence-transformers", specifier = ">=3.0" },
     { name = "torchvision", specifier = ">=0.27.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.49.0" },
+]
+
+[[package]]
+name = "scann"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "protobuf" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/49/8fd3392977d9aae2277b851190dfcdacb62528bfdd337ee7a24bd820bd0f/scann-1.4.2-cp312-cp312-manylinux_2_27_aarch64.whl", hash = "sha256:3042b599d1ada6c48650663d208359b5ccfcbcbfa4fa75bafb81402e6c87bfa4", size = 9296344, upload-time = "2025-08-29T14:32:33.749Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/f8/6ecec0c496a1f771c6874dbb00f619ab4ac1e434fa7661e4eedc4e959623/scann-1.4.2-cp312-cp312-manylinux_2_27_x86_64.whl", hash = "sha256:c0f45d810e629fdcdf8da546d1e25bde4664d27dcf5c3399aa335b4934a0734c", size = 11579291, upload-time = "2025-08-29T14:32:22.855Z" },
+    { url = "https://files.pythonhosted.org/packages/89/a1/b868924221e7ec8a8c2e7b74ad9fc730fe5554962dc0d56efc2615d03ea3/scann-1.4.2-cp313-cp313-manylinux_2_27_aarch64.whl", hash = "sha256:469a4a907ea09a15e4c25850330377bd9967c29177d836600051caf281e33612", size = 9296343, upload-time = "2025-08-29T14:32:35.436Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/b4/3decfd7039399b6bd9c9fbf0ccda39301bac01c39a09a5a791c8237f5d26/scann-1.4.2-cp313-cp313-manylinux_2_27_x86_64.whl", hash = "sha256:c87e97f91c98d7d1f0bf985b39634e07e1149ba79c20f7dbf9b7b465c94100f2", size = 11579811, upload-time = "2025-08-29T14:32:25.101Z" },
 ]
 
 [[package]]
