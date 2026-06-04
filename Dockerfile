@@ -1,20 +1,38 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+# ── Stage 1: builder ─────────────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
 
-# Set the working directory
+WORKDIR /build
+
+# Copy only what pip needs to build the package
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
+
+# Build and install the package + all runtime deps into a prefix directory.
+# pip fetches the uv_build backend declared in [build-system] automatically.
+RUN pip install --no-cache-dir --prefix=/install .
+
+
+# ── Stage 2: runtime ─────────────────────────────────────────────────────────
+FROM python:3.12-slim AS runtime
+
+# Non-root user for security
+RUN groupadd --system appgroup && useradd --system --gid appgroup appuser
+
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Bring installed packages from the builder stage
+COPY --from=builder /install /usr/local
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy data at build time (override at runtime via SAP_DATA_PATH mount if needed)
+COPY data/ ./data/
 
-# Make port 8000 available to the world outside this container
+# Configuration — override any value via environment variables (SAP_ prefix)
+ENV SAP_DATA_PATH=data/marketing_sample_for_amazon_com-amazon_fashion_products__20200201_20200430__30k_data.ldjson
+ENV SAP_API_HOST=0.0.0.0
+ENV SAP_API_PORT=8000
+
 EXPOSE 8000
 
-# Define environment variable
-ENV NAME ProductSimilarityApp
+USER appuser
 
-# Run app.py when the container launches
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "sap_cxii_tech_ex_01.api.app:app", "--host", "0.0.0.0", "--port", "8000"]

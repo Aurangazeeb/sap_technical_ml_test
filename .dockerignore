@@ -1,0 +1,34 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Virtual environment (uv creates .venv)
+.venv/
+
+# Git
+.git/
+.gitignore
+
+# Dev / notebook artifacts
+notebooks/
+.ipynb_checkpoints/
+
+# Large data files — mount at runtime via SAP_DATA_PATH if needed
+# (data/ is intentionally included in the image for the evaluation build)
+
+# Test and CI artefacts
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Editor / OS noise
+.DS_Store
+*.swp
+*.swo
+.env
