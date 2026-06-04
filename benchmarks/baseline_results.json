@@ -1,0 +1,14 @@
+{
+  "backend": "brute_force",
+  "dataset_size": 500,
+  "num_queries": 5,
+  "k": 10,
+  "latency_p50_ms": 9231.0,
+  "latency_p95_ms": 9961.47,
+  "latency_p99_ms": 10073.03,
+  "latency_mean_ms": 9300.97,
+  "throughput_qps": 0.11,
+  "wall_time_s": 46.5,
+  "peak_memory_mb": 23.49,
+  "recall_at_k": 1.0
+}
