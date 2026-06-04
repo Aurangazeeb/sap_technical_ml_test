@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [{ name = "auru", email = "aurangazeebak@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
+    "faiss-cpu>=1.14.2",
     "fastapi>=0.136.3",
     "httpx>=0.28.1",
     "ipykernel>=7.2.0",

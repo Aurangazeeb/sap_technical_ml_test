@@ -105,8 +105,11 @@ def test_recall_at_k_above_threshold(built_index, random_vectors) -> None:
     total = 0
     for i in range(min(50, len(random_vectors))):
         bf_indices = set(_brute_force_top_k(random_vectors, i, k).tolist())
-        ann_indices, _ = built_index.query(random_vectors[i], k=k)
-        ann_set = set(ann_indices.tolist()) - {i}  # exclude self if present
+        # Query k+1 because FAISS returns the query vector itself (dist=0)
+        ann_indices, _ = built_index.query(random_vectors[i], k=k + 1)
+        ann_set = set(ann_indices.tolist()) - {i}  # exclude self
+        # Take only top-k after removing self
+        ann_set = set(list(ann_set)[:k])
         bf_indices.discard(i)
         hits += len(ann_set & bf_indices)
         total += len(bf_indices)
