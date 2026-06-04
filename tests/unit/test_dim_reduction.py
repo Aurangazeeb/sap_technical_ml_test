@@ -14,9 +14,18 @@ import pytest
 
 @pytest.fixture
 def high_dim_text_vectors() -> np.ndarray:
-    """Simulates (500, 384) text embeddings."""
+    """Simulates (500, 384) text embeddings with realistic low-rank structure.
+
+    Real transformer embeddings concentrate variance in a low-dimensional
+    subspace.  We simulate this with a rank-100 latent space projected to
+    384-d, plus small isotropic noise.
+    """
     rng = np.random.default_rng(42)
-    return rng.standard_normal((500, 384)).astype(np.float32)
+    latent = rng.standard_normal((500, 100))
+    projection = rng.standard_normal((100, 384))
+    vectors = latent @ projection
+    vectors += 0.1 * rng.standard_normal(vectors.shape)
+    return vectors.astype(np.float32)
 
 
 @pytest.fixture
