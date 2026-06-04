@@ -26,7 +26,7 @@ def find_similar_products(product_id: str, num_similar: int) -> list[str]:
     """Return the *num_similar* most similar product IDs to *product_id*.
 
     Data and configuration are loaded automatically from ``Settings`` / ``.env``.
-    In tests, patch ``sap_cxii_tech_ex_01.search._load_dataset`` and/or
+    In tests, patch ``sap_cxii_tech_ex_01.search.load_dataset`` and/or
     ``sap_cxii_tech_ex_01.search.get_settings`` to inject controlled fixtures.
 
     Parameters

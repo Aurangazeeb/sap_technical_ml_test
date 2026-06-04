@@ -44,7 +44,7 @@ def tiny_df() -> pd.DataFrame:
 def patched(settings, tiny_df):
     with (
         patch.object(_search_mod, "get_settings", return_value=settings),
-        patch.object(_search_mod, "_load_dataset", return_value=tiny_df),
+        patch.object(_search_mod, "load_dataset", return_value=tiny_df),
     ):
         yield
 
@@ -53,7 +53,7 @@ def patched(settings, tiny_df):
 def _patch_with_df(settings, df):
     with (
         patch.object(_search_mod, "get_settings", return_value=settings),
-        patch.object(_search_mod, "_load_dataset", return_value=df),
+        patch.object(_search_mod, "load_dataset", return_value=df),
     ):
         yield
 

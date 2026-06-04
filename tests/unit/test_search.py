@@ -1,6 +1,6 @@
 """Core search function unit-level contract tests.
 
-Patches ``sap_cxii_tech_ex_01.search._load_dataset`` and ``get_settings``
+Patches ``sap_cxii_tech_ex_01.search.load_dataset`` and ``get_settings``
 so ``find_similar_products(product_id, num_similar)`` runs against
 controlled test fixtures without touching the real dataset or .env.
 """
@@ -47,7 +47,7 @@ def patched(settings, tiny_df):
     """Patch data-loading so find_similar_products uses test fixtures."""
     with (
         patch.object(_search_mod, "get_settings", return_value=settings),
-        patch.object(_search_mod, "_load_dataset", return_value=tiny_df),
+        patch.object(_search_mod, "load_dataset", return_value=tiny_df),
     ):
         yield
 

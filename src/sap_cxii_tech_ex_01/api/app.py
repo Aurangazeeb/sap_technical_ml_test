@@ -15,7 +15,7 @@ import pandas as pd
 from fastapi import FastAPI
 
 from sap_cxii_tech_ex_01.config import Settings, get_settings
-from sap_cxii_tech_ex_01.search import load_dataset
+from sap_cxii_tech_ex_01.search import load_dataset  # noqa: F401 — imported for patch target in tests
 
 __all__ = ["app"]
 
