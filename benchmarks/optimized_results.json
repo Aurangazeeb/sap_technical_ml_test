@@ -1,0 +1,18 @@
+{
+  "backend": "pca_hnsw_cached",
+  "dataset_size": 500,
+  "num_queries": 5,
+  "k": 10,
+  "pca_target_dim": 128,
+  "feature_extraction_s": 6.8,
+  "index_build_s": 0.03,
+  "latency_p50_ms": 0.2968,
+  "latency_p95_ms": 2.7681,
+  "latency_p99_ms": 3.2474,
+  "latency_mean_ms": 0.8097,
+  "throughput_qps": 1224.18,
+  "wall_time_s": 0.0041,
+  "peak_memory_mb": 0.0,
+  "recall_at_k": 0.36,
+  "cache_size": 5
+}
