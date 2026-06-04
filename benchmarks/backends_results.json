@@ -1,0 +1,172 @@
+[
+  {
+    "n": 30000,
+    "dim": 128,
+    "k": 10,
+    "backends": {
+      "faiss_hnsw": {
+        "build_s": 0.46,
+        "recall_at_k": 1.0,
+        "p50_ms": 0.1615,
+        "p95_ms": 0.1948,
+        "p99_ms": 0.2072,
+        "qps": 6193.2
+      },
+      "scann": {
+        "build_s": 0.45,
+        "recall_at_k": 0.75,
+        "p50_ms": 0.0332,
+        "p95_ms": 0.0393,
+        "p99_ms": 0.0422,
+        "qps": 30080.6
+      },
+      "turboquant_4bit": {
+        "build_s": 0.16,
+        "recall_at_k": 1.0,
+        "compressed_ratio": 0.125,
+        "p50_ms": 0.2576,
+        "p95_ms": 0.2702,
+        "p99_ms": 0.2737,
+        "qps": 3881.4
+      },
+      "turboquant_2bit": {
+        "build_s": 0.11,
+        "recall_at_k": 0.995,
+        "compressed_ratio": 0.0625,
+        "p50_ms": 0.1799,
+        "p95_ms": 0.1954,
+        "p99_ms": 0.2096,
+        "qps": 5559.5
+      },
+      "two_stage_faiss": {
+        "build_s": 0.55,
+        "recall_at_k": 1.0,
+        "p50_ms": 0.2024,
+        "p95_ms": 0.2257,
+        "p99_ms": 0.2576,
+        "qps": 4940.0
+      }
+    }
+  },
+  {
+    "n": 100000,
+    "dim": 128,
+    "k": 10,
+    "backends": {
+      "faiss_hnsw": {
+        "build_s": 3.27,
+        "recall_at_k": 1.0,
+        "p50_ms": 0.4933,
+        "p95_ms": 0.8958,
+        "p99_ms": 3.1086,
+        "qps": 2027.1
+      },
+      "scann": {
+        "build_s": 1.25,
+        "recall_at_k": 0.8,
+        "p50_ms": 0.057,
+        "p95_ms": 0.0648,
+        "p99_ms": 0.0689,
+        "qps": 17547.2
+      },
+      "turboquant_4bit": {
+        "build_s": 0.26,
+        "recall_at_k": 1.0,
+        "compressed_ratio": 0.125,
+        "p50_ms": 0.7236,
+        "p95_ms": 0.7404,
+        "p99_ms": 0.7433,
+        "qps": 1381.9
+      },
+      "turboquant_2bit": {
+        "build_s": 0.16,
+        "recall_at_k": 0.985,
+        "compressed_ratio": 0.0625,
+        "p50_ms": 0.4446,
+        "p95_ms": 0.4613,
+        "p99_ms": 0.4654,
+        "qps": 2249.1
+      },
+      "two_stage_faiss": {
+        "build_s": 2.86,
+        "recall_at_k": 1.0,
+        "p50_ms": 0.4357,
+        "p95_ms": 0.6064,
+        "p99_ms": 0.6463,
+        "qps": 2295.0
+      }
+    }
+  },
+  {
+    "n": 500000,
+    "dim": 128,
+    "k": 10,
+    "backends": {
+      "faiss_hnsw": {
+        "build_s": 52.44,
+        "recall_at_k": "skipped",
+        "p50_ms": 0.9451,
+        "p95_ms": 1.2177,
+        "p99_ms": 1.2962,
+        "qps": 1058.1
+      },
+      "scann": {
+        "build_s": 3.28,
+        "recall_at_k": "skipped",
+        "p50_ms": 0.1045,
+        "p95_ms": 0.1241,
+        "p99_ms": 0.1361,
+        "qps": 9571.2
+      },
+      "turboquant_4bit": {
+        "build_s": 0.75,
+        "recall_at_k": "skipped",
+        "compressed_ratio": 0.125,
+        "p50_ms": 4.2504,
+        "p95_ms": 4.6391,
+        "p99_ms": 4.6658,
+        "qps": 235.3
+      },
+      "turboquant_2bit": {
+        "build_s": 0.66,
+        "recall_at_k": "skipped",
+        "compressed_ratio": 0.0625,
+        "p50_ms": 1.791,
+        "p95_ms": 1.9786,
+        "p99_ms": 2.0025,
+        "qps": 558.3
+      },
+      "two_stage_faiss": {
+        "build_s": 53.02,
+        "recall_at_k": "skipped",
+        "p50_ms": 0.9397,
+        "p95_ms": 1.119,
+        "p99_ms": 1.1568,
+        "qps": 1064.1
+      }
+    }
+  },
+  {
+    "n": 1000000,
+    "dim": 128,
+    "k": 10,
+    "backends": {
+      "faiss_hnsw": {
+        "build_s": 134.2,
+        "recall_at_k": "skipped",
+        "p50_ms": 0.9652,
+        "p95_ms": 1.2229,
+        "p99_ms": 1.3912,
+        "qps": 1036.0
+      },
+      "two_stage_faiss": {
+        "build_s": 134.77,
+        "recall_at_k": "skipped",
+        "p50_ms": 0.954,
+        "p95_ms": 1.2559,
+        "p99_ms": 1.3788,
+        "qps": 1048.3
+      }
+    }
+  }
+]
