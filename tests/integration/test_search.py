@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sap_cxii_tech_ex_01.search import SearchState, build_search_state, find_similar_products
+from sap_cxii_tech_ex_01.search import build_search_state, find_similar_products, set_search_state
 
 
 # ── Helpers & fixtures ────────────────────────────────────────────────────────
@@ -38,23 +38,23 @@ def tiny_df() -> pd.DataFrame:
 
 
 @pytest.fixture
-def state(settings, tiny_df) -> SearchState:
-    return build_search_state(tiny_df, settings)
+def _install_state(settings, tiny_df) -> None:
+    set_search_state(build_search_state(tiny_df, settings))
 
 
 # ── Integration: all returned IDs exist in the input DataFrame ───────────────
 
-def test_results_are_valid_product_ids(state, tiny_df):
+def test_results_are_valid_product_ids(_install_state, tiny_df):
     valid_ids = set(tiny_df["uniq_id"].tolist())
-    for pid in find_similar_products("prod_001", 4, state):
+    for pid in find_similar_products("prod_001", 4):
         assert pid in valid_ids, f"{pid!r} not in input DataFrame"
 
 
 # ── Integration: num_similar == len(df) - 1 (max possible) ───────────────────
 
-def test_num_similar_max_returns_all_others(state, tiny_df):
+def test_num_similar_max_returns_all_others(_install_state, tiny_df):
     n = len(tiny_df)
-    results = find_similar_products("prod_000", n - 1, state)
+    results = find_similar_products("prod_000", n - 1)
     assert len(results) == n - 1
     assert "prod_000" not in results
     assert set(results) == set(tiny_df["uniq_id"].tolist()) - {"prod_000"}
@@ -83,8 +83,8 @@ def test_text_identical_products_rank_highest(settings):
             "image_urls__small": [None] * 5,
         }
     )
-    state = build_search_state(df, settings)
-    results = find_similar_products("prod_000", 1, state)
+    set_search_state(build_search_state(df, settings))
+    results = find_similar_products("prod_000", 1)
     assert results[0] == "prod_001", (
         f"Expected 'prod_001' (identical text) to rank first, got {results[0]!r}"
     )

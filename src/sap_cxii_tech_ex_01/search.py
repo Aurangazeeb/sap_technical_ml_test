@@ -21,9 +21,18 @@ from sap_cxii_tech_ex_01.features.structured import StructuredExtractor
 from sap_cxii_tech_ex_01.features.text import TextExtractor
 from sap_cxii_tech_ex_01.similarity import SimilarityEngine
 
-__all__ = ["SearchState", "build_search_state", "find_similar_products", "load_dataset"]
+__all__ = ["SearchState", "build_search_state", "find_similar_products", "load_dataset", "set_search_state"]
 
 logger = logging.getLogger(__name__)
+
+# Module-level singleton — set once at startup via set_search_state().
+_search_state: SearchState | None = None
+
+
+def set_search_state(state: SearchState) -> None:
+    """Install the pre-computed search state for query-time use."""
+    global _search_state  # noqa: PLW0603
+    _search_state = state
 
 
 @dataclass(frozen=True)
@@ -137,11 +146,11 @@ def _try_extract_images(
 def find_similar_products(
     product_id: str,
     num_similar: int,
-    state: SearchState,
 ) -> list[str]:
     """Return the *num_similar* most similar product IDs to *product_id*.
 
-    Uses the pre-computed ``state`` built at startup — no heavy extraction.
+    Uses the pre-computed search state installed at startup via
+    :func:`set_search_state` — no heavy extraction per request.
 
     Parameters
     ----------
@@ -149,8 +158,6 @@ def find_similar_products(
         The ``uniq_id`` of the query product.
     num_similar:
         Number of similar products to return (query product excluded).
-    state:
-        Pre-computed :class:`SearchState` from :func:`build_search_state`.
 
     Returns
     -------
@@ -161,7 +168,14 @@ def find_similar_products(
     ------
     ValueError
         If *product_id* is not present in the dataset.
+    RuntimeError
+        If called before :func:`set_search_state`.
     """
+    if _search_state is None:
+        raise RuntimeError(
+            "Search state not initialised. Call set_search_state() first."
+        )
+    state = _search_state
     ids = state.ids
     if product_id not in ids:
         raise ValueError(

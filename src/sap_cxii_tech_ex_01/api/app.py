@@ -17,7 +17,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from sap_cxii_tech_ex_01.config import Settings, get_settings
-from sap_cxii_tech_ex_01.search import build_search_state, load_dataset  # noqa: F401 — imported for patch target in tests
+from sap_cxii_tech_ex_01.search import build_search_state, load_dataset, set_search_state  # noqa: F401 — imported for patch target in tests
 
 __all__ = ["app"]
 
@@ -37,7 +37,8 @@ async def lifespan(app: FastAPI):
     app.state.startup_time = time.monotonic()
 
     # Heavy feature extraction happens once here, not per-request.
-    app.state.search_state = build_search_state(df, settings)
+    search_state = build_search_state(df, settings)
+    set_search_state(search_state)
     app.state.ready = True
     yield
     app.state.ready = False

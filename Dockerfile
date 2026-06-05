@@ -26,10 +26,17 @@ COPY --from=builder /install /usr/local
 # Copy data at build time (override at runtime via SAP_DATA_PATH mount if needed)
 COPY data/ ./data/
 
+# Create a writable cache directory and hand ownership to appuser.
+# Must happen before USER appuser; --system users have no home dir, so we
+# redirect HuggingFace / sentence-transformers cache to /app/.cache instead.
+RUN mkdir -p /app/.cache && chown -R appuser:appgroup /app
+
 # Configuration — override any value via environment variables (SAP_ prefix)
 ENV SAP_DATA_PATH=data/marketing_sample_for_amazon_com-amazon_fashion_products__20200201_20200430__30k_data.ldjson
 ENV SAP_API_HOST=0.0.0.0
 ENV SAP_API_PORT=8000
+# Redirect HuggingFace model cache into /app/.cache (writable by appuser)
+ENV HF_HOME=/app/.cache/huggingface
 
 EXPOSE 8000
 
